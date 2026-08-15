@@ -13,6 +13,7 @@ export const companiesTable = pgTable('companies', {
   url: text('url').notNull(),
   accent: text('accent').notNull(),
   initials: text('initials').notNull(),
+  xHandle: text('x_handle'),
 })
 
 export const storiesTable = pgTable('stories', {

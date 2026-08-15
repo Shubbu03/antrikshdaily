@@ -32,6 +32,7 @@ export async function ingest() {
         url: company.url,
         accent: company.accent,
         initials: company.initials,
+        xHandle: company.xHandle,
       },
     })
   }

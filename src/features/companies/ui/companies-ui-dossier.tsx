@@ -1,5 +1,9 @@
 import { ArrowUpRightIcon, XIcon } from "@phosphor-icons/react";
-import type { Company } from "../data-access/companies";
+import {
+	companyAccountHref,
+	companyAccountLabel,
+	type Company,
+} from "../data-access/companies";
 
 type CompanyDossierProps = {
 	company: Company;
@@ -44,7 +48,15 @@ export function CompanyDossier({ company, closeDossier }: CompanyDossierProps) {
 					>
 						{company.name}
 					</h2>
-					<p className="mt-2.5 mb-0 font-sans text-[13px] font-medium text-paper/55">
+					<a
+						href={companyAccountHref(company)}
+						target="_blank"
+						rel="noreferrer"
+						className="mt-2.5 inline-block font-sans text-[13px] font-medium text-paper/75 no-underline underline-offset-2 transition duration-200 hover:text-paper hover:underline"
+					>
+						{companyAccountLabel(company)}
+					</a>
+					<p className="mt-1 mb-0 font-sans text-[13px] font-medium text-paper/55">
 						{company.city} · Est. {company.founded}
 					</p>
 				</div>
