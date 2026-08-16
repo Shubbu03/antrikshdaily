@@ -1,9 +1,10 @@
-import { desc } from 'drizzle-orm'
+import { desc, gte } from 'drizzle-orm'
 import { companies as seedCompanies, type Company } from '@/features/companies/data-access/companies'
 import { stories as seedStories } from '@/features/signals/data-access/stories'
 import { getDb } from './index'
-import { mapStory } from './map'
+import { mapStory, parseDisplayDate } from './map'
 import { companiesTable, storiesTable, type CompanyRow } from './schema'
+import { isFreshStory, storyCutoffDate } from './story-filter'
 
 function mapCompany(row: CompanyRow): Company {
   return {
@@ -31,10 +32,16 @@ export async function listCompanies() {
   return rows.length > 0 ? rows.map(mapCompany) : seedCompanies
 }
 
+function recentSeedStories() {
+  return seedStories.filter((story) => isFreshStory(parseDisplayDate(story.date)))
+}
+
 export async function listStories() {
   const db = getDb()
-  if (!db) return seedStories
+  if (!db) return recentSeedStories()
 
-  const rows = await db.select().from(storiesTable).orderBy(desc(storiesTable.date))
-  return rows.length > 0 ? rows.map(mapStory) : seedStories
+  const rows = await db.select().from(storiesTable)
+    .where(gte(storiesTable.date, storyCutoffDate()))
+    .orderBy(desc(storiesTable.date))
+  return rows.length > 0 ? rows.map(mapStory) : recentSeedStories()
 }

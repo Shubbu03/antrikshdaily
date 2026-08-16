@@ -14,14 +14,22 @@ export function hasDatabase() {
   return Boolean(getDatabaseUrl())
 }
 
-export function getDb() {
+function getClient() {
   const url = getDatabaseUrl()
   if (!url) return null
 
-  const client = globalForDb.pg ?? postgres(url, { max: 1 })
-  if (process.env.NODE_ENV !== 'production') {
-    globalForDb.pg = client
-  }
+  globalForDb.pg ??= postgres(url, { max: 1 })
+  return globalForDb.pg
+}
 
+export function getDb() {
+  const client = getClient()
+  if (!client) return null
   return drizzle(client, { schema })
+}
+
+export async function closeDb() {
+  if (!globalForDb.pg) return
+  await globalForDb.pg.end({ timeout: 5 })
+  globalForDb.pg = undefined
 }
