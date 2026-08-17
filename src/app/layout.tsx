@@ -1,22 +1,30 @@
-import type { Metadata, Viewport } from 'next'
-import './globals.css'
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "Antriksh Daily — India's private space frontier",
-  description: "News and company notes from India's private space industry.",
-  icons: {
-    icon: '/orbit-mark.svg',
-  },
-}
+	title: "Antriksh Daily — India's private space frontier",
+	description: "News and company notes from India's private space industry.",
+	icons: {
+		icon: "/orbit-mark.svg",
+	},
+};
 
 export const viewport: Viewport = {
-  themeColor: '#f0eadc',
-}
+	themeColor: "#f0eadc",
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  )
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	return (
+		<html lang="en">
+			<body>
+				{children}
+				<Analytics />
+			</body>
+		</html>
+	);
 }
