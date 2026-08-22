@@ -1,6 +1,6 @@
 import { companies } from '@/features/companies/data-access/companies'
 import type { Story } from '@/features/signals/data-access/stories'
-import { googleNewsSearchUrl } from './match-company'
+import { googleNewsIndustrySearchUrl, googleNewsSearchUrl } from './match-company'
 import {
   parseBellatrixUpdates,
   parseDhruvaPress,
@@ -50,7 +50,18 @@ export const newsSources: NewsSource[] = [
     category: 'Satellites',
     url: googleNewsSearchUrl(),
     accent: '#e94b2c',
-    maxItems: 12,
+    maxItems: 24,
+  },
+  {
+    id: 'google-news-industry',
+    kind: 'google-news',
+    companyId: null,
+    company: '',
+    source: 'Google News',
+    category: 'Industry',
+    url: googleNewsIndustrySearchUrl(),
+    accent: '#e94b2c',
+    maxItems: 10,
   },
   companySource('satsure', {
     kind: 'rss',

@@ -58,3 +58,8 @@ export function googleNewsSearchUrl() {
   const query = `${companies.map((company) => `"${company.name}"`).join(' OR ')} when:11w`
   return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`
 }
+
+export function googleNewsIndustrySearchUrl() {
+  const query = '("space startups" OR "space-tech startups" OR "IN-SPACe" OR "private space" OR "Indian space industry") when:11w'
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`
+}

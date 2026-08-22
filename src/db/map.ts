@@ -7,7 +7,10 @@ export function companyIdForName(name: string) {
 }
 
 export function parseDisplayDate(value: string) {
-  const parsed = new Date(value)
+  const match = value.trim().match(/^(\d{1,2}) ([A-Za-z]{3}) (\d{4})$/)
+  const parsed = match
+    ? new Date(`${match[1]} ${match[2]} ${match[3]} 12:00:00 GMT`)
+    : new Date(value)
   if (Number.isNaN(parsed.getTime())) {
     throw new Error(`Could not parse date: ${value}`)
   }

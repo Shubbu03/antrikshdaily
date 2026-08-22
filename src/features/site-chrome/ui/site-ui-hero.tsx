@@ -2,9 +2,15 @@
 
 import Image from 'next/image'
 import { ArrowRightIcon } from '@phosphor-icons/react'
+import type { Story } from '@/features/signals/data-access/stories'
+import { coverFor } from '../data-access/cover'
 import { scrollToId } from '../../../lib/scroll-to'
 
-export function Hero() {
+type HeroProps = {
+  lead?: Story
+}
+
+export function Hero({ lead }: HeroProps) {
   return (
     <section
       className="hero-grid section-pad relative grid min-h-0 grid-cols-1 items-center gap-[clamp(28px,4vw,72px)] border-b border-line pt-17.5 pb-10 sm:min-h-172.5 md:grid-cols-2 md:pb-17.5 lg:grid-cols-[minmax(380px,1.05fr)_minmax(420px,1.2fr)_170px] lg:py-0"
@@ -52,13 +58,13 @@ export function Hero() {
       </figure>
 
       <div className="relative z-10 hidden animate-reveal flex-col justify-end self-stretch border-l border-line py-10 pr-0 pl-7 [animation-delay:0.24s] lg:flex">
-        <span className="absolute top-11 right-0 font-sans text-xs font-medium text-muted [writing-mode:vertical-rl]">This month</span>
+        <span className="absolute top-11 right-0 font-sans text-xs font-medium text-muted [writing-mode:vertical-rl]">Latest</span>
         <strong className="font-sans text-[26px] leading-[0.95] font-semibold tracking-[-0.02em]">
-          Vikram-1<br />reaches orbit
+          {lead ? coverFor(lead).railTitle : 'India is building up'}
         </strong>
         <div className="mt-4.5 flex flex-col gap-1.25 border-t border-line pt-3 font-sans text-[13px] font-medium text-muted">
-          <span>Skyroot</span>
-          <span>18 July 2026</span>
+          <span>{lead?.company === 'Industry' ? 'Private space' : lead?.company ?? 'Antriksh Daily'}</span>
+          <span>{lead?.date ?? ''}</span>
         </div>
       </div>
     </section>

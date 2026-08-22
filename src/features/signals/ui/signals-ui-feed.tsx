@@ -45,7 +45,7 @@ export function SignalsFeed({ stories, saved, toggleSaved }: SignalsFeedProps) {
 					</h2>
 				</div>
 				<p className="m-0 max-w-110 font-sans text-[17px] leading-[1.45] text-heading md:max-w-none">
-					Stories from the companies building India’s private space industry.
+					Stories from the companies — and the policy room — building India’s private space industry.
 				</p>
 			</div>
 

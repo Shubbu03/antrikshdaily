@@ -1,5 +1,6 @@
 import { companies } from '@/features/companies/data-access/companies'
-import { matchCompany } from './match-company'
+import type { Story } from '@/features/signals/data-access/stories'
+import { matchCompany, storyCategoryFor } from './match-company'
 
 export const STORY_MAX_AGE_DAYS = Math.round(2.5 * 30.4375)
 const DUPLICATE_WINDOW_DAYS = 14
@@ -37,6 +38,15 @@ const JUNK_PATTERN = /\b(kbc|kaun banega|amitabh|bachchan|unlisted share|share p
 
 const SPACE_PATTERN = /\b(space|spacetech|space-tech|aerospace|satellite|satellites|launch|launcher|orbit|orbital|rocket|propulsion|spacecraft|constellation|hyperspectral|payload|isro|in-space|inspace|vikram|agnibaan|earth observation|thruster|re-?entry|microgravity|leo|sar)\b/i
 
+const INDIA_CONTEXT = /\b(india|indian|modi|narendra|prime minister|\bpm\b|pmo|in-?space|isro)\b/i
+
+const PRIVATE_SPACE_SECTOR = /\b(start-?ups?|private space|space (ceos?|founders?)|homegrown space|space-tech|spacetech|space (industry|ecosystem|sector))\b/i
+
+const SECTOR_HEADLINE = /\b(space startups?|space-tech startups?|spacetech startups?|private space|space (industry|ecosystem|sector)|ceos? of \d+|founders? (and|&) ceos?)\b/i
+
+export const INDUSTRY_LABEL = 'Industry'
+export const INDUSTRY_ACCENT = '#e94b2c'
+
 export function storyCutoffDate(now = new Date()) {
   return new Date(now.getTime() - STORY_MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
 }
@@ -73,19 +83,65 @@ export function isTrackedFirmStory(title: string, summary = '', officialCompany?
   return Boolean(matchCompany(title) || matchCompany(`${title} ${summary}`))
 }
 
+export function isIndustryStory(title: string, summary = '') {
+  const text = `${title} ${summary}`
+  return SPACE_PATTERN.test(text) && INDIA_CONTEXT.test(text) && PRIVATE_SPACE_SECTOR.test(text)
+}
+
+export function isSectorHeadline(title: string) {
+  return SECTOR_HEADLINE.test(title)
+}
+
+function industryCategory(title: string): Story['category'] {
+  if (/\b(raises?|raised|funding|investment|series [a-c]|pre-series|unicorn|crore|\$\d)/i.test(title)) {
+    return 'Capital'
+  }
+  if (/\b(launch|rocket|orbital flight|vikram|agnibaan)\b/i.test(title)) {
+    return 'Launch'
+  }
+  return 'Industry'
+}
+
+export function resolveGoogleNewsStory(title: string, summary = '') {
+  const company = matchCompany(title)
+  const industry = isIndustryStory(title, summary)
+  const sector = isSectorHeadline(title)
+
+  if (industry && (!company || sector)) {
+    return {
+      companyId: null as string | null,
+      company: INDUSTRY_LABEL,
+      category: industryCategory(title),
+      accent: INDUSTRY_ACCENT,
+    }
+  }
+
+  if (!company) return null
+
+  return {
+    companyId: company.id,
+    company: company.name,
+    category: storyCategoryFor(company, title),
+    accent: company.accent,
+  }
+}
+
 export function acceptFetchedStory(input: {
   title: string
   summary?: string
   date: Date
   requireCompanyInTitle?: boolean
   officialCompany?: string
+  allowIndustry?: boolean
 }) {
   if (!isFreshStory(input.date)) return false
   if (isJunkStory(input.title)) return false
-  if (input.requireCompanyInTitle && !matchCompany(input.title)) return false
-  if (!isTrackedFirmStory(input.title, input.summary, input.officialCompany)) return false
   if (!isSpaceIndustryStory(input.title, input.summary)) return false
   if (input.title.trim().length < 24) return false
+
+  const industry = Boolean(input.allowIndustry && isIndustryStory(input.title, input.summary))
+  if (input.requireCompanyInTitle && !matchCompany(input.title) && !industry) return false
+  if (!isTrackedFirmStory(input.title, input.summary, input.officialCompany) && !industry) return false
   return true
 }
 
@@ -121,6 +177,16 @@ function jaccard(left: string[], right: string[]) {
   return union === 0 ? 0 : overlap / union
 }
 
+function eventKeys(title: string) {
+  const text = title.toLowerCase()
+  const keys: string[] = []
+  if (/\b(modi|narendra|prime minister|\bpm\b|pmo)\b/.test(text)) keys.push('modi')
+  if (/\bstart-?ups?\b/.test(text)) keys.push('startup')
+  if (/\bin-?space\b/.test(text)) keys.push('inspace')
+  if (/\bseva teerth\b/.test(text)) keys.push('sevateerth')
+  return keys
+}
+
 export function storiesAreDuplicates(
   left: { company: string; title: string; date: Date },
   right: { company: string; title: string; date: Date },
@@ -134,6 +200,12 @@ export function storiesAreDuplicates(
   const score = jaccard(leftTokens, rightTokens)
   if (score >= 0.5) return true
 
+  if (left.company === INDUSTRY_LABEL) {
+    const shared = eventKeys(left.title).filter((key) => eventKeys(right.title).includes(key))
+    if (shared.includes('modi') && shared.includes('startup')) return true
+    if (score >= 0.35) return true
+  }
+
   const distinctive = leftTokens.filter((word) => (
     word.length >= 5 && !GENERIC_EVENT_WORDS.has(word) && rightTokens.includes(word)
   ))
@@ -146,6 +218,9 @@ export function storiesAreDuplicates(
 export function isOfficialCompanyUrl(url: string) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, '')
+    if (host === 'pib.gov.in' || host === 'pmindia.gov.in' || host.endsWith('.pib.gov.in')) {
+      return true
+    }
     return companies.some((company) => {
       const companyHost = new URL(company.url).hostname.replace(/^www\./, '')
       return host === companyHost || host.endsWith(`.${companyHost}`)

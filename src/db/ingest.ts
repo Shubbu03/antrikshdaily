@@ -4,7 +4,7 @@ import { companies } from '@/features/companies/data-access/companies'
 import { stories } from '@/features/signals/data-access/stories'
 import { closeDb, getDb } from './index'
 import { companyIdForName, parseDisplayDate } from './map'
-import { matchCompany, storyCategoryFor } from './match-company'
+import { storyCategoryFor } from './match-company'
 import { fetchNewsroom } from './newsrooms'
 import { fetchFeed, type RssItem } from './rss'
 import { companiesTable, storiesTable } from './schema'
@@ -13,6 +13,7 @@ import {
   acceptFetchedStory,
   dedupeStories,
   isFreshStory,
+  resolveGoogleNewsStory,
   storiesAreDuplicates,
   storyCutoffDate,
 } from './story-filter'
@@ -168,25 +169,27 @@ async function collectSourceItems(source: NewsSource): Promise<IncomingStory[]> 
 
 function mapIncomingStory(source: NewsSource, item: RssItem): IncomingStory | null {
   if (source.kind === 'google-news') {
-    const company = matchCompany(item.title)
-    if (!company) return null
     if (!acceptFetchedStory({
       title: item.title,
       summary: item.summary,
       date: item.date,
       requireCompanyInTitle: true,
+      allowIndustry: true,
     })) return null
 
+    const resolved = resolveGoogleNewsStory(item.title, item.summary)
+    if (!resolved) return null
+
     return {
-      companyId: company.id,
-      company: company.name,
-      category: storyCategoryFor(company, item.title),
+      companyId: resolved.companyId,
+      company: resolved.company,
+      category: resolved.category,
       date: item.date,
       title: item.title,
       summary: item.summary || item.title,
       source: item.publication || source.source,
       url: item.url,
-      accent: company.accent,
+      accent: resolved.accent,
     }
   }
 

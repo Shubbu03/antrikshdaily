@@ -1,15 +1,20 @@
 'use client'
 
 import { CaretRightIcon } from '@phosphor-icons/react'
+import type { Story } from '@/features/signals/data-access/stories'
 import { scrollToId } from '../../../lib/scroll-to'
 
-const highlights = [
-  { company: 'Skyroot', text: 'Vikram-1 maiden orbital flight successful' },
-  { company: 'Dhruva', text: '₹105 Cr backing for Project Garud' },
-  { company: 'Pixxel', text: 'Six Fireflies in phase-one constellation' },
-]
+type TickerProps = {
+  stories: Story[]
+}
 
-export function Ticker() {
+function tickerLabel(story: Story) {
+  return story.company === 'Industry' ? 'India' : story.company.replace(/ Aerospace| Space Labs| Cosmos| Space$/, '')
+}
+
+export function Ticker({ stories }: TickerProps) {
+  const highlights = stories.slice(0, 3)
+
   return (
     <section
       className="grid min-h-14 grid-cols-[90px_1fr] items-center overflow-hidden border-b border-line sm:grid-cols-[110px_1fr] md:grid-cols-[140px_1fr_auto]"
@@ -20,8 +25,8 @@ export function Ticker() {
       </div>
       <div className="flex gap-12 overflow-hidden px-3.5 font-sans text-[9px] font-medium whitespace-nowrap sm:px-7 sm:text-sm">
         {highlights.map((item, index) => (
-          <span key={item.company} className={`flex gap-2.5 ${index === 0 ? 'overflow-hidden text-ellipsis' : 'hidden md:flex'}`}>
-            <strong className="font-semibold text-signal">{item.company}</strong> {item.text}
+          <span key={item.id} className={`flex gap-2.5 ${index === 0 ? 'overflow-hidden text-ellipsis' : 'hidden md:flex'}`}>
+            <strong className="font-semibold text-signal">{tickerLabel(item)}</strong> {item.title}
           </span>
         ))}
       </div>

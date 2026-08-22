@@ -1,4 +1,4 @@
-export type Category = 'All' | 'Launch' | 'Earth data' | 'Satellites' | 'Propulsion' | 'Capital'
+export type Category = 'All' | 'Launch' | 'Earth data' | 'Satellites' | 'Propulsion' | 'Capital' | 'Industry'
 
 export type Story = {
   id: string
@@ -14,9 +14,22 @@ export type Story = {
   accent: string
 }
 
-export const categories: Category[] = ['All', 'Launch', 'Earth data', 'Satellites', 'Propulsion', 'Capital']
+export const categories: Category[] = ['All', 'Launch', 'Earth data', 'Satellites', 'Propulsion', 'Capital', 'Industry']
 
 export const stories: Story[] = [
+  {
+    id: 'pm-space-ceos',
+    company: 'Industry',
+    category: 'Industry',
+    date: '21 Aug 2026',
+    title: 'PM Modi meets 20 space startup CEOs at Seva Teerth',
+    summary: 'The Prime Minister told founders from Skyroot, Agnikul, Pixxel, Dhruva, GalaxEye and the rest of the private space bench that India can become a magnet for global talent and investment, and asked them to take space technology into farms, climate work and daily life.',
+    source: 'PMO',
+    url: 'https://www.pmindia.gov.in/en/news_updates/pm-interacts-with-ceos-and-founders-of-space-startups/',
+    metric: '20',
+    metricLabel: 'startup CEOs at Seva Teerth',
+    accent: '#e94b2c',
+  },
   {
     id: 'skyroot-orbit',
     company: 'Skyroot Aerospace',

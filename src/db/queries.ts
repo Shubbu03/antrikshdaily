@@ -33,7 +33,9 @@ export async function listCompanies() {
 }
 
 function recentSeedStories() {
-  return seedStories.filter((story) => isFreshStory(parseDisplayDate(story.date)))
+  return seedStories
+    .filter((story) => isFreshStory(parseDisplayDate(story.date)))
+    .sort((left, right) => parseDisplayDate(right.date).getTime() - parseDisplayDate(left.date).getTime())
 }
 
 export async function listStories() {
